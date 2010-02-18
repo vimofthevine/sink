@@ -1,9 +1,9 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 /**
- * @brief   Database migration library
+ * @brief   Database synchronization library
  * @author  Kyle Treubig
  */
-class Migration extends Migration_Core {
+class Sink extends Sink_Core {
 }
 

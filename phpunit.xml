@@ -4,14 +4,14 @@
     testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader">
 
     <testsuites>
-        <testsuite name="Migration Module Test Suite">
-            <directory>./tests/migration</directory>
+        <testsuite name="Sink Module Test Suite">
+            <directory>./tests/sink</directory>
         </testsuite>
     </testsuites>
 
     <groups>
         <include>
-            <group>migration</group>
+            <group>sink</group>
         </include>
     </groups>
 

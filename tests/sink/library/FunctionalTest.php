@@ -1,13 +1,13 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 /**
- * Migration module library unit tests
+ * Sink module library unit tests
  *
  * @author  Kyle Treubig
- * @group   migration
- * @group   migration.library
+ * @group   sink
+ * @group   sink.library
  */
-class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
+class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
 
     /**
      * Set up the test case
@@ -24,13 +24,13 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test adding table
      */
     public function testAddTable() {
-        $migration = new Migration;
+        $sink = new Sink;
 
-        $result1 = $migration->table('some_table');
+        $result1 = $sink->table('some_table');
         $this->assertEquals(1, count($result1));
         $this->assertEquals('some_table', $result1[0]);
 
-        $result2 = $migration->table('another_table');
+        $result2 = $sink->table('another_table');
         $this->assertEquals(2, count($result2));
         $this->assertEquals('some_table', $result2[0]);
         $this->assertEquals('another_table', $result2[1]);
@@ -40,9 +40,9 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test adding tables
      */
     public function testAddTables() {
-        $migration = new Migration;
+        $sink = new Sink;
 
-        $result1 = $migration->tables(array(
+        $result1 = $sink->tables(array(
             'one_table',
             'two_table',
         ));
@@ -50,7 +50,7 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('one_table', $result1[0]);
         $this->assertEquals('two_table', $result1[1]);
 
-        $result2 = $migration->tables(array(
+        $result2 = $sink->tables(array(
             'three_table',
             'four_table',
             'five_table',
@@ -65,7 +65,7 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test library constructor
      */
     public function testConstructor() {
-        $migration = new Migration;
+        $sink = new Sink;
 
         $database = Database::instance();
         $this->assertContains('db_deltas', $database->list_tables());
@@ -75,10 +75,10 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test library instantiation
      */
     public function testInstance() {
-        $migration = Migration::instance();
-        $migration->table('one_table');
+        $sink = Sink::instance();
+        $sink->table('one_table');
 
-        $library = Migration::instance();
+        $library = Sink::instance();
         $tables = $library->table('second_table');
 
         $this->assertEquals(2, count($tables));
@@ -90,8 +90,8 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test initialization of no tables
      */
     public function testInitializeNoTables() {
-        $migration = new Migration;
-        $result = $migration->initialize();
+        $sink = new Sink;
+        $result = $sink->initialize();
         $this->assertEquals(0, count($result));
     }
 
@@ -99,12 +99,12 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test initialization of tables
      */
     public function testInitializeTables() {
-        $migration = new Migration;
-        $migration->tables(array(
+        $sink = new Sink;
+        $sink->tables(array(
             'ut_init',
             'ut_pop',
         ));
-        $result = $migration->initialize();
+        $result = $sink->initialize();
 
         $this->assertEquals(2, count($result));
         $this->assertEquals(1, $result['ut_init']);
@@ -120,12 +120,12 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test initialization and population of tables
      */
     public function testInitializeAndPopulate() {
-        $migration = new Migration;
-        $migration->tables(array(
+        $sink = new Sink;
+        $sink->tables(array(
             'ut_init',
             'ut_pop',
         ));
-        $result = $migration->initialize(TRUE);
+        $result = $sink->initialize(TRUE);
 
         $this->assertEquals(2, count($result));
         $this->assertEquals(1, $result['ut_init']);
@@ -142,8 +142,8 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching of no tables
      */
     public function testPatchNoTables() {
-        $migration = new Migration;
-        $result = $migration->patch();
+        $sink = new Sink;
+        $result = $sink->patch();
         $this->assertEquals(0, count($result[0]));
         $this->assertEquals(0, count($result[1]));
     }
@@ -152,9 +152,9 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching with no patches available
      */
     public function testPatchNoPatches() {
-        $migration = new Migration;
-        $migration->table('db_deltas');
-        $result = $migration->patch();
+        $sink = new Sink;
+        $sink->table('db_deltas');
+        $result = $sink->patch();
         $this->assertEquals(0, count($result[0]));
         $this->assertEquals(0, count($result[1]));
     }
@@ -163,10 +163,10 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching of table
      */
     public function testPatchOnTable() {
-        $migration = new Migration;
-        $migration->table('ut_pop');
-        $migration->initialize();
-        $result = $migration->patch();
+        $sink = new Sink;
+        $sink->table('ut_pop');
+        $sink->initialize();
+        $result = $sink->patch();
 
         $this->assertEquals(2, count($result[0]));
         $available = implode("\n", $result[0]);
@@ -190,16 +190,16 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching on already applied patches
      */
     public function testPatchAlreadyApplied() {
-        $migration = new Migration;
-        $migration->table('ut_pop');
-        $migration->initialize();
+        $sink = new Sink;
+        $sink->table('ut_pop');
+        $sink->initialize();
 
         DB::insert('db_deltas', array('id','file'))
             ->values(
                 array(1,'01-ut_pop-add_column'),
                 array(2,'02-ut_pop-add_column')
             )->execute();
-        $result = $migration->patch();
+        $result = $sink->patch();
 
         $this->assertEquals(2, count($result[0]));
         $available = implode("\n", $result[0]);
@@ -212,10 +212,10 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching on populated tables
      */
     public function testPatchOnPopulated() {
-        $migration = new Migration;
-        $migration->table('ut_pop');
-        $migration->initialize(TRUE);
-        $result = $migration->patch();
+        $sink = new Sink;
+        $sink->table('ut_pop');
+        $sink->initialize(TRUE);
+        $result = $sink->patch();
 
         $this->assertEquals(2, count($result[0]));
         $available = implode("\n", $result[0]);
@@ -245,10 +245,10 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching order
      */
     public function testPatchOrder() {
-        $migration = new Migration;
-        $migration->table('ut_init');
-        $migration->initialize();
-        $result = $migration->patch();
+        $sink = new Sink;
+        $sink->table('ut_init');
+        $sink->initialize();
+        $result = $sink->patch();
 
         $this->assertEquals(2, count($result[1]));
         $this->assertRegExp('/ut_init/', $result[1][3]['descrip']);
@@ -265,13 +265,13 @@ class Migration_LibraryTest extends PHPUnit_Framework_TestCase {
      * Test patching on a previous patch
      */
     public function testSecondPatch() {
-        $migration = new Migration;
-        $migration->table('ut_pop');
-        $migration->initialize();
+        $sink = new Sink;
+        $sink->table('ut_pop');
+        $sink->initialize();
 
         DB::insert('db_deltas', array('id','file'))
             ->values(array(1,'01-ut_pop-add_column'))->execute();
-        $result = $migration->patch();
+        $result = $sink->patch();
 
         $this->assertEquals(1, count($result[1]));
         $this->assertRegExp('/ut_pop/', $result[1][2]['descrip']);

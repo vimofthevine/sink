@@ -1,21 +1,21 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 /**
- * @brief   Database migration library
+ * @brief   Database synchronization library
  * @author  Kyle Treubig
  */
-class Migration_Core {
+class Sink_Core {
     /** Database tables */
     private $tables = array();
 
     /**
-     * Return an instance of the Migration library
-     * @return  Migration library object
+     * Return an instance of the Sink library
+     * @return  Sink library object
      */
     public static function instance() {
         static $instance;
         if ( ! isset($instance)) {
-            $instance = new Migration;
+            $instance = new Sink;
         }
         return $instance;
     }

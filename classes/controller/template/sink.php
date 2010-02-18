@@ -1,10 +1,10 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 /**
- * @brief   Migration installation template controller
+ * @brief   Sink installation template controller
  * @author  Kyle Treubig
  */
-abstract class Controller_Template_Migration extends Controller {
+abstract class Controller_Template_Sink extends Controller {
 
     /**
      * Default action
@@ -18,7 +18,7 @@ abstract class Controller_Template_Migration extends Controller {
      * Create tables
      */
     public function action_tables() {
-        $tables = Migration::instance()->initialize(TRUE);
+        $tables = Sink::instance()->initialize(TRUE);
         echo '<h1>Table Schemas:</h1>';
 
         foreach($tables as $table=>$result) {
@@ -40,7 +40,7 @@ abstract class Controller_Template_Migration extends Controller {
      * Apply database patches
      */
     public function action_patches() {
-        $patches = Migration::instance()->patch();
+        $patches = Sink::instance()->patch();
         echo '<h1>Patches:</h1>';
 
         echo '<h2>Available patches:</h2>';
