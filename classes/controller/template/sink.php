@@ -40,21 +40,25 @@ abstract class Controller_Template_Sink extends Controller {
      * Apply database patches
      */
     public function action_patches() {
-        $patches = Sink::instance()->patch();
+        Sink::instance()->patch($available, $applied);
         echo '<h1>Patches:</h1>';
 
         echo '<h2>Available patches:</h2>';
         echo '<pre>';
-        foreach($patches[0] as $patch) {
-            echo $patch.'<br />';
+        foreach($available as $table=>$patches) {
+            foreach($patches as $num=>$descrip) {
+                echo "$num [$table] - $descrip<br />";
+            }
         }
         echo '</pre>';
 
         echo '<h2>Applied patches:</h2>';
         echo '<pre>';
-        foreach($patches[1] as $patch) {
-            echo $patch['descrip'],'<br />';
-            echo '  '.($patch['result'] ? 'Patch applied successfully.' : 'Error applying patch.').'<br />';
+        foreach($applied as $table=>$patches) {
+            foreach($patches as $num=>$patch) {
+                echo "$num [$table] - {$patch['descrip']}<br />";
+                echo '  '.($patch['result'] ? 'Patch applied successfully.' : 'Error applying patch.').'<br />';
+            }
         }
         echo '</pre>';
     }

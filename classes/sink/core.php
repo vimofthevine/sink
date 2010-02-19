@@ -93,53 +93,59 @@ class Sink_Core {
      * Applied patches array is of the form number=>array('descrip','result')
      * where result is a boolean indicating patch success.
      */
-    public function patch() {
-        $return = array(0=>array(), 1=>array());
-        $deltas = Kohana::list_files('queries/deltas');
+    public function patch(&$available, &$applied) {
         $available = array();
+        $applied = array();
 
-        foreach($deltas as $delta) {
-            $lines = file($delta);
-            $tmp = explode("/", $delta);
+        $delta_files = Kohana::list_files('queries/deltas');
+        $available_files = array();
+
+        foreach($delta_files as $delta_file) {
+            $tmp = explode("/", $delta_file);
             $file = substr(end($tmp), 0, -4);
-            $delta = explode("-", $file, 3);
-            $num = (int) $delta[0];
-            $table = $delta[1];
-            $descrip = substr($lines[0], 3);
-            if (in_array($table, $this->tables)) {
-                $available[$num] = $file;
-                $return[0][$num] = "#$num [$table] - $descrip";
-            }
-        }
 
-        $applied = DB::select()->from('db_deltas')->execute()->as_array('id', 'file');
-        $applicable = array_diff($available, $applied);
-
-        foreach($applicable as $id=>$delta) {
-            $query = Kohana::find_file('queries/deltas', $delta, 'sql');
-            $sql = file_get_contents($query);
-
-            $lines = file($query);
-            $tmp = explode("/", $delta);
-            $file = end($tmp);
             $info = explode("-", $file, 3);
             $num = (int) $info[0];
             $table = $info[1];
-            $descrip = trim(substr($lines[0], 3),"\n");
-            $return[1][$num]['descrip'] = "#$num [$table] - $descrip.";
 
-            try {
-                DB::query(Database::UPDATE, $sql)->execute();
-                DB::insert('db_deltas', array('id','file','date'))
-                    ->values(array($id, $delta, time()))->execute();
-                $return[1][$num]['result'] = TRUE;
-            } catch (Database_Exception $e) {
-                $return[1][$num]['result'] = FALSE;
-                echo $e->getMessage();
+            $lines = file($delta_file);
+            $descrip = substr($lines[0], 3);
+
+            if (in_array($table, $this->tables)) {
+                $available_files[$file] = $file;
+                $available[$table][$num] = $descrip;
             }
         }
 
-        return $return;
+        $applied_files = DB::select()->from('db_deltas')->execute()->as_array('file', 'file');
+        $applicable_files = array_diff($available_files, $applied_files);
+
+        foreach($applicable_files as $delta_file) {
+            $query = Kohana::find_file('queries/deltas', $delta_file, 'sql');
+            $sql = file_get_contents($query);
+
+            $tmp = explode("/", $delta_file);
+            $file = end($tmp);
+
+            $info = explode("-", $file, 3);
+            $num = (int) $info[0];
+            $table = $info[1];
+
+            $lines = file($query);
+            $descrip = trim(substr($lines[0], 3),"\n");
+
+            $applied[$table][$num]['descrip'] = $descrip;
+
+            try {
+                DB::query(Database::UPDATE, $sql)->execute();
+                DB::insert('db_deltas', array('file','date'))
+                    ->values(array($delta_file, time()))->execute();
+                $applied[$table][$num]['result'] = TRUE;
+            } catch (Database_Exception $e) {
+                $applied[$table][$num]['result'] = FALSE;
+                echo $e->getMessage();
+            }
+        }
     }
 }
 

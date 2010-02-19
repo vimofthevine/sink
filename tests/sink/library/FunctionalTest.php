@@ -143,9 +143,9 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
      */
     public function testPatchNoTables() {
         $sink = new Sink;
-        $result = $sink->patch();
-        $this->assertEquals(0, count($result[0]));
-        $this->assertEquals(0, count($result[1]));
+        $sink->patch($available, $applied);
+        $this->assertEquals(0, count($available));
+        $this->assertEquals(0, count($applied));
     }
 
     /**
@@ -154,9 +154,9 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
     public function testPatchNoPatches() {
         $sink = new Sink;
         $sink->table('db_deltas');
-        $result = $sink->patch();
-        $this->assertEquals(0, count($result[0]));
-        $this->assertEquals(0, count($result[1]));
+        $sink->patch($available, $applied);
+        $this->assertEquals(0, count($available));
+        $this->assertEquals(0, count($applied));
     }
 
     /**
@@ -166,16 +166,15 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
         $sink = new Sink;
         $sink->table('ut_pop');
         $sink->initialize();
-        $result = $sink->patch();
+        $sink->patch($available, $applied);
 
-        $this->assertEquals(2, count($result[0]));
-        $available = implode("\n", $result[0]);
-        $this->assertRegExp('/ut_pop/', $available);
-        $this->assertEquals(2, count($result[1]));
-        $this->assertRegExp('/ut_pop/', $result[1][1]['descrip']);
-        $this->assertTrue($result[1][1]['result']);
-        $this->assertRegExp('/ut_pop/', $result[1][2]['descrip']);
-        $this->assertTrue($result[1][2]['result']);
+        $this->assertArrayHasKey('ut_pop', $available);
+        $this->assertEquals(2, count($available['ut_pop']));
+
+        $this->assertArrayHasKey('ut_pop', $applied);
+        $this->assertEquals(2, count($applied['ut_pop']));
+        $this->assertTrue($applied['ut_pop'][1]['result']);
+        $this->assertTrue($applied['ut_pop'][2]['result']);
 
         $database = Database::instance();
         $columns = $database->list_columns('ut_pop');
@@ -194,18 +193,17 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
         $sink->table('ut_pop');
         $sink->initialize();
 
-        DB::insert('db_deltas', array('id','file'))
+        DB::insert('db_deltas', array('file'))
             ->values(
-                array(1,'01-ut_pop-add_column'),
-                array(2,'02-ut_pop-add_column')
+                array('01-ut_pop-add_column'),
+                array('02-ut_pop-add_column')
             )->execute();
-        $result = $sink->patch();
+        $sink->patch($available, $applied);
 
-        $this->assertEquals(2, count($result[0]));
-        $available = implode("\n", $result[0]);
-        $this->assertRegExp('/ut_pop/', $available);
+        $this->assertArrayHasKey('ut_pop', $available);
+        $this->assertEquals(2, count($available['ut_pop']));
 
-        $this->assertEquals(0, count($result[1]));
+        $this->assertEquals(0, count($applied));
     }
 
     /**
@@ -215,16 +213,15 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
         $sink = new Sink;
         $sink->table('ut_pop');
         $sink->initialize(TRUE);
-        $result = $sink->patch();
+        $sink->patch($available, $applied);
 
-        $this->assertEquals(2, count($result[0]));
-        $available = implode("\n", $result[0]);
-        $this->assertRegExp('/ut_pop/', $available);
-        $this->assertEquals(2, count($result[1]));
-        $this->assertRegExp('/ut_pop/', $result[1][1]['descrip']);
-        $this->assertTrue($result[1][1]['result']);
-        $this->assertRegExp('/ut_pop/', $result[1][2]['descrip']);
-        $this->assertTrue($result[1][2]['result']);
+        $this->assertArrayHasKey('ut_pop', $available);
+        $this->assertEquals(2, count($available['ut_pop']));
+
+        $this->assertArrayHasKey('ut_pop', $applied);
+        $this->assertEquals(2, count($applied['ut_pop']));
+        $this->assertTrue($applied['ut_pop'][1]['result']);
+        $this->assertTrue($applied['ut_pop'][2]['result']);
 
         $database = Database::instance();
         $columns = $database->list_columns('ut_pop');
@@ -248,13 +245,12 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
         $sink = new Sink;
         $sink->table('ut_init');
         $sink->initialize();
-        $result = $sink->patch();
+        $sink->patch($available, $applied);
 
-        $this->assertEquals(2, count($result[1]));
-        $this->assertRegExp('/ut_init/', $result[1][3]['descrip']);
-        $this->assertTrue($result[1][3]['result']);
-        $this->assertRegExp('/ut_init/', $result[1][4]['descrip']);
-        $this->assertTrue($result[1][4]['result']);
+        $this->assertArrayHasKey('ut_init', $applied);
+        $this->assertEquals(2, count($applied['ut_init']));
+        $this->assertTrue($applied['ut_init'][3]['result']);
+        $this->assertTrue($applied['ut_init'][4]['result']);
 
         $database = Database::instance();
         $columns = $database->list_columns('ut_init');
@@ -271,11 +267,11 @@ class Sink_Library_FuncationalTest extends PHPUnit_Framework_TestCase {
 
         DB::insert('db_deltas', array('id','file'))
             ->values(array(1,'01-ut_pop-add_column'))->execute();
-        $result = $sink->patch();
+        $sink->patch($available, $applied);
 
-        $this->assertEquals(1, count($result[1]));
-        $this->assertRegExp('/ut_pop/', $result[1][2]['descrip']);
-        $this->assertTrue($result[1][2]['result']);
+        $this->assertArrayHasKey('ut_pop', $applied);
+        $this->assertEquals(1, count($applied['ut_pop']));
+        $this->assertTrue($applied['ut_pop'][2]['result']);
 
         $database = Database::instance();
         $columns = $database->list_columns('ut_pop');
