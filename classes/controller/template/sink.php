@@ -1,8 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 /**
- * @brief   Sink installation template controller
- * @author  Kyle Treubig
+ * Sink installation template controller
  */
 abstract class Controller_Template_Sink extends Controller {
 

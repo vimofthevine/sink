@@ -1,8 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 /**
- * @brief   Installation demo controller (Sink module)
- * @author  Kyle Treubig
+ * Installation demo controller (Sink module)
  */
 class Controller_Install extends Controller_Template_Sink {
 
