@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') OR die('No direct script access.');
 
 /**
  * Database synchronization library
@@ -8,6 +8,5 @@
  * @copyright   (c) 2010 Kyle Treubig
  * @license     MIT
  */
-class Sink extends Sink_Core {
-}
+class Sink extends Sink_Core { }
 
